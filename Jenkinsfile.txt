@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout the source code from the repository
+                git branch: 'main', url: 'https://github.com/abubakar1o/Blazor-app.git'
+            }
+        }
+        
+        stage('Build and Test') {
+            steps {
+                // Build and test the .NET application
+                sh 'dotnet build'
+                sh 'dotnet test'
+            }
+            post {
+                success {
+                    echo "Build and Test succeeded"
+                }
+                failure {
+                    echo "Build and Test failed"
+                }
+            }
+        }
+        
+        stage('Publish') {
+            steps {
+                // Publish the .NET application
+                sh 'dotnet publish -c Release -o ./publish'
+            }
+            post {
+                success {
+                    echo "Publish succeeded"
+                }
+                failure {
+                    echo "Publish failed"
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                // Copy the published files to the server
+                sh 'scp -r ./publish/* abubakar@74.235.239.120:/home/abubakar/java/blazor-app/net8.0/publish'
+            }
+            post {
+                success {
+                    echo "Deployment succeeded"
+                }
+                failure {
+                    echo "Deployment failed"
+                }
+            }
+        }
+    }
+}
